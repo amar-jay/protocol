@@ -1,16 +1,13 @@
 package main
 
 import (
-	_ "github.com/envoyproxy/protoc-gen-validate"
 	"github.com/livekit/protocol/livekit"
-	_ "github.com/livekit/protocol/livekit"
 	"google.golang.org/protobuf/proto"
 )
 
 func main() {
-	marshal, err := proto.Marshal(nil)
+	_, err := proto.Marshal(&livekit.WebhookEvent{})
 	if err != nil {
-		println("%v", marshal, err, livekit.WebhookEvent{})
+		println(err)
 	}
-	println("Hello World")
 }

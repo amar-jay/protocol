@@ -18,6 +18,10 @@ export namespace livekit {
         H264_HIGH = 3,
         VP8 = 4
     }
+    export enum ImageCodec {
+        IC_DEFAULT = 0,
+        IC_JPEG = 1
+    }
     export enum TrackType {
         AUDIO = 0,
         VIDEO = 1,
@@ -57,11 +61,16 @@ export namespace livekit {
         JOIN_FAILURE = 7
     }
     export enum ReconnectReason {
-        RR_UNKOWN = 0,
+        RR_UNKNOWN = 0,
         RR_SIGNAL_DISCONNECTED = 1,
         RR_PUBLISHER_FAILED = 2,
         RR_SUBSCRIBER_FAILED = 3,
         RR_SWITCH_CANDIDATE = 4
+    }
+    export enum SubscriptionError {
+        SE_UNKNOWN = 0,
+        SE_CODEC_UNSUPPORTED = 1,
+        SE_TRACK_NOTFOUND = 2
     }
     export class Room extends pb_1.Message {
         #one_of_decls: number[][] = [];
@@ -448,6 +457,119 @@ export namespace livekit {
         }
         static deserializeBinary(bytes: Uint8Array): Codec {
             return Codec.deserialize(bytes);
+        }
+    }
+    export class PlayoutDelay extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            enabled?: boolean;
+            min?: number;
+            max?: number;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("enabled" in data && data.enabled != undefined) {
+                    this.enabled = data.enabled;
+                }
+                if ("min" in data && data.min != undefined) {
+                    this.min = data.min;
+                }
+                if ("max" in data && data.max != undefined) {
+                    this.max = data.max;
+                }
+            }
+        }
+        get enabled() {
+            return pb_1.Message.getFieldWithDefault(this, 1, false) as boolean;
+        }
+        set enabled(value: boolean) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get min() {
+            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
+        }
+        set min(value: number) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        get max() {
+            return pb_1.Message.getFieldWithDefault(this, 3, 0) as number;
+        }
+        set max(value: number) {
+            pb_1.Message.setField(this, 3, value);
+        }
+        static fromObject(data: {
+            enabled?: boolean;
+            min?: number;
+            max?: number;
+        }): PlayoutDelay {
+            const message = new PlayoutDelay({});
+            if (data.enabled != null) {
+                message.enabled = data.enabled;
+            }
+            if (data.min != null) {
+                message.min = data.min;
+            }
+            if (data.max != null) {
+                message.max = data.max;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                enabled?: boolean;
+                min?: number;
+                max?: number;
+            } = {};
+            if (this.enabled != null) {
+                data.enabled = this.enabled;
+            }
+            if (this.min != null) {
+                data.min = this.min;
+            }
+            if (this.max != null) {
+                data.max = this.max;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.enabled != false)
+                writer.writeBool(1, this.enabled);
+            if (this.min != 0)
+                writer.writeUint32(2, this.min);
+            if (this.max != 0)
+                writer.writeUint32(3, this.max);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): PlayoutDelay {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new PlayoutDelay();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.enabled = reader.readBool();
+                        break;
+                    case 2:
+                        message.min = reader.readUint32();
+                        break;
+                    case 3:
+                        message.max = reader.readUint32();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): PlayoutDelay {
+            return PlayoutDelay.deserialize(bytes);
         }
     }
     export class ParticipantPermission extends pb_1.Message {
@@ -1165,6 +1287,7 @@ export namespace livekit {
             stereo?: boolean;
             disable_red?: boolean;
             encryption?: Encryption.Type;
+            stream?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [10, 13], this.#one_of_decls);
@@ -1216,6 +1339,9 @@ export namespace livekit {
                 }
                 if ("encryption" in data && data.encryption != undefined) {
                     this.encryption = data.encryption;
+                }
+                if ("stream" in data && data.stream != undefined) {
+                    this.stream = data.stream;
                 }
             }
         }
@@ -1315,6 +1441,12 @@ export namespace livekit {
         set encryption(value: Encryption.Type) {
             pb_1.Message.setField(this, 16, value);
         }
+        get stream() {
+            return pb_1.Message.getFieldWithDefault(this, 17, "") as string;
+        }
+        set stream(value: string) {
+            pb_1.Message.setField(this, 17, value);
+        }
         static fromObject(data: {
             sid?: string;
             type?: TrackType;
@@ -1332,6 +1464,7 @@ export namespace livekit {
             stereo?: boolean;
             disable_red?: boolean;
             encryption?: Encryption.Type;
+            stream?: string;
         }): TrackInfo {
             const message = new TrackInfo({});
             if (data.sid != null) {
@@ -1382,6 +1515,9 @@ export namespace livekit {
             if (data.encryption != null) {
                 message.encryption = data.encryption;
             }
+            if (data.stream != null) {
+                message.stream = data.stream;
+            }
             return message;
         }
         toObject() {
@@ -1402,6 +1538,7 @@ export namespace livekit {
                 stereo?: boolean;
                 disable_red?: boolean;
                 encryption?: Encryption.Type;
+                stream?: string;
             } = {};
             if (this.sid != null) {
                 data.sid = this.sid;
@@ -1451,6 +1588,9 @@ export namespace livekit {
             if (this.encryption != null) {
                 data.encryption = this.encryption;
             }
+            if (this.stream != null) {
+                data.stream = this.stream;
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -1489,6 +1629,8 @@ export namespace livekit {
                 writer.writeBool(15, this.disable_red);
             if (this.encryption != Encryption.Type.NONE)
                 writer.writeEnum(16, this.encryption);
+            if (this.stream.length)
+                writer.writeString(17, this.stream);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -1545,6 +1687,9 @@ export namespace livekit {
                         break;
                     case 16:
                         message.encryption = reader.readEnum();
+                        break;
+                    case 17:
+                        message.stream = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -2040,22 +2185,30 @@ export namespace livekit {
         #one_of_decls: number[][] = [[4]];
         constructor(data?: any[] | ({
             participant_sid?: string;
+            participant_identity?: string;
             payload?: Uint8Array;
             destination_sids?: string[];
+            destination_identities?: string[];
         } & (({
             topic?: string;
         })))) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 6], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("participant_sid" in data && data.participant_sid != undefined) {
                     this.participant_sid = data.participant_sid;
+                }
+                if ("participant_identity" in data && data.participant_identity != undefined) {
+                    this.participant_identity = data.participant_identity;
                 }
                 if ("payload" in data && data.payload != undefined) {
                     this.payload = data.payload;
                 }
                 if ("destination_sids" in data && data.destination_sids != undefined) {
                     this.destination_sids = data.destination_sids;
+                }
+                if ("destination_identities" in data && data.destination_identities != undefined) {
+                    this.destination_identities = data.destination_identities;
                 }
                 if ("topic" in data && data.topic != undefined) {
                     this.topic = data.topic;
@@ -2068,6 +2221,12 @@ export namespace livekit {
         set participant_sid(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
+        get participant_identity() {
+            return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
+        }
+        set participant_identity(value: string) {
+            pb_1.Message.setField(this, 5, value);
+        }
         get payload() {
             return pb_1.Message.getFieldWithDefault(this, 2, new Uint8Array(0)) as Uint8Array;
         }
@@ -2079,6 +2238,12 @@ export namespace livekit {
         }
         set destination_sids(value: string[]) {
             pb_1.Message.setField(this, 3, value);
+        }
+        get destination_identities() {
+            return pb_1.Message.getFieldWithDefault(this, 6, []) as string[];
+        }
+        set destination_identities(value: string[]) {
+            pb_1.Message.setField(this, 6, value);
         }
         get topic() {
             return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
@@ -2100,19 +2265,27 @@ export namespace livekit {
         }
         static fromObject(data: {
             participant_sid?: string;
+            participant_identity?: string;
             payload?: Uint8Array;
             destination_sids?: string[];
+            destination_identities?: string[];
             topic?: string;
         }): UserPacket {
             const message = new UserPacket({});
             if (data.participant_sid != null) {
                 message.participant_sid = data.participant_sid;
             }
+            if (data.participant_identity != null) {
+                message.participant_identity = data.participant_identity;
+            }
             if (data.payload != null) {
                 message.payload = data.payload;
             }
             if (data.destination_sids != null) {
                 message.destination_sids = data.destination_sids;
+            }
+            if (data.destination_identities != null) {
+                message.destination_identities = data.destination_identities;
             }
             if (data.topic != null) {
                 message.topic = data.topic;
@@ -2122,18 +2295,26 @@ export namespace livekit {
         toObject() {
             const data: {
                 participant_sid?: string;
+                participant_identity?: string;
                 payload?: Uint8Array;
                 destination_sids?: string[];
+                destination_identities?: string[];
                 topic?: string;
             } = {};
             if (this.participant_sid != null) {
                 data.participant_sid = this.participant_sid;
+            }
+            if (this.participant_identity != null) {
+                data.participant_identity = this.participant_identity;
             }
             if (this.payload != null) {
                 data.payload = this.payload;
             }
             if (this.destination_sids != null) {
                 data.destination_sids = this.destination_sids;
+            }
+            if (this.destination_identities != null) {
+                data.destination_identities = this.destination_identities;
             }
             if (this.topic != null) {
                 data.topic = this.topic;
@@ -2146,10 +2327,14 @@ export namespace livekit {
             const writer = w || new pb_1.BinaryWriter();
             if (this.participant_sid.length)
                 writer.writeString(1, this.participant_sid);
+            if (this.participant_identity.length)
+                writer.writeString(5, this.participant_identity);
             if (this.payload.length)
                 writer.writeBytes(2, this.payload);
             if (this.destination_sids.length)
                 writer.writeRepeatedString(3, this.destination_sids);
+            if (this.destination_identities.length)
+                writer.writeRepeatedString(6, this.destination_identities);
             if (this.has_topic)
                 writer.writeString(4, this.topic);
             if (!w)
@@ -2164,11 +2349,17 @@ export namespace livekit {
                     case 1:
                         message.participant_sid = reader.readString();
                         break;
+                    case 5:
+                        message.participant_identity = reader.readString();
+                        break;
                     case 2:
                         message.payload = reader.readBytes();
                         break;
                     case 3:
                         pb_1.Message.addToRepeatedField(message, 3, reader.readString());
+                        break;
+                    case 6:
+                        pb_1.Message.addToRepeatedField(message, 6, reader.readString());
                         break;
                     case 4:
                         message.topic = reader.readString();
@@ -2747,7 +2938,9 @@ export namespace livekit {
             GO = 5,
             UNITY = 6,
             REACT_NATIVE = 7,
-            RUST = 8
+            RUST = 8,
+            PYTHON = 9,
+            CPP = 10
         }
     }
     export class ClientConfiguration extends pb_1.Message {
@@ -3075,6 +3268,263 @@ export namespace livekit {
             return DisabledCodecs.deserialize(bytes);
         }
     }
+    export class RTPDrift extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            start_time?: dependency_1.google.protobuf.Timestamp;
+            end_time?: dependency_1.google.protobuf.Timestamp;
+            duration?: number;
+            start_timestamp?: number;
+            end_timestamp?: number;
+            rtp_clock_ticks?: number;
+            drift_samples?: number;
+            drift_ms?: number;
+            clock_rate?: number;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("start_time" in data && data.start_time != undefined) {
+                    this.start_time = data.start_time;
+                }
+                if ("end_time" in data && data.end_time != undefined) {
+                    this.end_time = data.end_time;
+                }
+                if ("duration" in data && data.duration != undefined) {
+                    this.duration = data.duration;
+                }
+                if ("start_timestamp" in data && data.start_timestamp != undefined) {
+                    this.start_timestamp = data.start_timestamp;
+                }
+                if ("end_timestamp" in data && data.end_timestamp != undefined) {
+                    this.end_timestamp = data.end_timestamp;
+                }
+                if ("rtp_clock_ticks" in data && data.rtp_clock_ticks != undefined) {
+                    this.rtp_clock_ticks = data.rtp_clock_ticks;
+                }
+                if ("drift_samples" in data && data.drift_samples != undefined) {
+                    this.drift_samples = data.drift_samples;
+                }
+                if ("drift_ms" in data && data.drift_ms != undefined) {
+                    this.drift_ms = data.drift_ms;
+                }
+                if ("clock_rate" in data && data.clock_rate != undefined) {
+                    this.clock_rate = data.clock_rate;
+                }
+            }
+        }
+        get start_time() {
+            return pb_1.Message.getWrapperField(this, dependency_1.google.protobuf.Timestamp, 1) as dependency_1.google.protobuf.Timestamp;
+        }
+        set start_time(value: dependency_1.google.protobuf.Timestamp) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_start_time() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get end_time() {
+            return pb_1.Message.getWrapperField(this, dependency_1.google.protobuf.Timestamp, 2) as dependency_1.google.protobuf.Timestamp;
+        }
+        set end_time(value: dependency_1.google.protobuf.Timestamp) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_end_time() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        get duration() {
+            return pb_1.Message.getFieldWithDefault(this, 3, 0) as number;
+        }
+        set duration(value: number) {
+            pb_1.Message.setField(this, 3, value);
+        }
+        get start_timestamp() {
+            return pb_1.Message.getFieldWithDefault(this, 4, 0) as number;
+        }
+        set start_timestamp(value: number) {
+            pb_1.Message.setField(this, 4, value);
+        }
+        get end_timestamp() {
+            return pb_1.Message.getFieldWithDefault(this, 5, 0) as number;
+        }
+        set end_timestamp(value: number) {
+            pb_1.Message.setField(this, 5, value);
+        }
+        get rtp_clock_ticks() {
+            return pb_1.Message.getFieldWithDefault(this, 6, 0) as number;
+        }
+        set rtp_clock_ticks(value: number) {
+            pb_1.Message.setField(this, 6, value);
+        }
+        get drift_samples() {
+            return pb_1.Message.getFieldWithDefault(this, 7, 0) as number;
+        }
+        set drift_samples(value: number) {
+            pb_1.Message.setField(this, 7, value);
+        }
+        get drift_ms() {
+            return pb_1.Message.getFieldWithDefault(this, 8, 0) as number;
+        }
+        set drift_ms(value: number) {
+            pb_1.Message.setField(this, 8, value);
+        }
+        get clock_rate() {
+            return pb_1.Message.getFieldWithDefault(this, 9, 0) as number;
+        }
+        set clock_rate(value: number) {
+            pb_1.Message.setField(this, 9, value);
+        }
+        static fromObject(data: {
+            start_time?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
+            end_time?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
+            duration?: number;
+            start_timestamp?: number;
+            end_timestamp?: number;
+            rtp_clock_ticks?: number;
+            drift_samples?: number;
+            drift_ms?: number;
+            clock_rate?: number;
+        }): RTPDrift {
+            const message = new RTPDrift({});
+            if (data.start_time != null) {
+                message.start_time = dependency_1.google.protobuf.Timestamp.fromObject(data.start_time);
+            }
+            if (data.end_time != null) {
+                message.end_time = dependency_1.google.protobuf.Timestamp.fromObject(data.end_time);
+            }
+            if (data.duration != null) {
+                message.duration = data.duration;
+            }
+            if (data.start_timestamp != null) {
+                message.start_timestamp = data.start_timestamp;
+            }
+            if (data.end_timestamp != null) {
+                message.end_timestamp = data.end_timestamp;
+            }
+            if (data.rtp_clock_ticks != null) {
+                message.rtp_clock_ticks = data.rtp_clock_ticks;
+            }
+            if (data.drift_samples != null) {
+                message.drift_samples = data.drift_samples;
+            }
+            if (data.drift_ms != null) {
+                message.drift_ms = data.drift_ms;
+            }
+            if (data.clock_rate != null) {
+                message.clock_rate = data.clock_rate;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                start_time?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
+                end_time?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
+                duration?: number;
+                start_timestamp?: number;
+                end_timestamp?: number;
+                rtp_clock_ticks?: number;
+                drift_samples?: number;
+                drift_ms?: number;
+                clock_rate?: number;
+            } = {};
+            if (this.start_time != null) {
+                data.start_time = this.start_time.toObject();
+            }
+            if (this.end_time != null) {
+                data.end_time = this.end_time.toObject();
+            }
+            if (this.duration != null) {
+                data.duration = this.duration;
+            }
+            if (this.start_timestamp != null) {
+                data.start_timestamp = this.start_timestamp;
+            }
+            if (this.end_timestamp != null) {
+                data.end_timestamp = this.end_timestamp;
+            }
+            if (this.rtp_clock_ticks != null) {
+                data.rtp_clock_ticks = this.rtp_clock_ticks;
+            }
+            if (this.drift_samples != null) {
+                data.drift_samples = this.drift_samples;
+            }
+            if (this.drift_ms != null) {
+                data.drift_ms = this.drift_ms;
+            }
+            if (this.clock_rate != null) {
+                data.clock_rate = this.clock_rate;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_start_time)
+                writer.writeMessage(1, this.start_time, () => this.start_time.serialize(writer));
+            if (this.has_end_time)
+                writer.writeMessage(2, this.end_time, () => this.end_time.serialize(writer));
+            if (this.duration != 0)
+                writer.writeDouble(3, this.duration);
+            if (this.start_timestamp != 0)
+                writer.writeUint64(4, this.start_timestamp);
+            if (this.end_timestamp != 0)
+                writer.writeUint64(5, this.end_timestamp);
+            if (this.rtp_clock_ticks != 0)
+                writer.writeUint64(6, this.rtp_clock_ticks);
+            if (this.drift_samples != 0)
+                writer.writeInt64(7, this.drift_samples);
+            if (this.drift_ms != 0)
+                writer.writeDouble(8, this.drift_ms);
+            if (this.clock_rate != 0)
+                writer.writeDouble(9, this.clock_rate);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): RTPDrift {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new RTPDrift();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.start_time, () => message.start_time = dependency_1.google.protobuf.Timestamp.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.end_time, () => message.end_time = dependency_1.google.protobuf.Timestamp.deserialize(reader));
+                        break;
+                    case 3:
+                        message.duration = reader.readDouble();
+                        break;
+                    case 4:
+                        message.start_timestamp = reader.readUint64();
+                        break;
+                    case 5:
+                        message.end_timestamp = reader.readUint64();
+                        break;
+                    case 6:
+                        message.rtp_clock_ticks = reader.readUint64();
+                        break;
+                    case 7:
+                        message.drift_samples = reader.readInt64();
+                        break;
+                    case 8:
+                        message.drift_ms = reader.readDouble();
+                        break;
+                    case 9:
+                        message.clock_rate = reader.readDouble();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): RTPDrift {
+            return RTPDrift.deserialize(bytes);
+        }
+    }
     export class RTPStats extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
@@ -3119,8 +3569,8 @@ export namespace livekit {
             last_key_frame?: dependency_1.google.protobuf.Timestamp;
             layer_lock_plis?: number;
             last_layer_lock_pli?: dependency_1.google.protobuf.Timestamp;
-            sample_rate?: number;
-            drift_ms?: number;
+            packet_drift?: RTPDrift;
+            report_drift?: RTPDrift;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -3248,11 +3698,11 @@ export namespace livekit {
                 if ("last_layer_lock_pli" in data && data.last_layer_lock_pli != undefined) {
                     this.last_layer_lock_pli = data.last_layer_lock_pli;
                 }
-                if ("sample_rate" in data && data.sample_rate != undefined) {
-                    this.sample_rate = data.sample_rate;
+                if ("packet_drift" in data && data.packet_drift != undefined) {
+                    this.packet_drift = data.packet_drift;
                 }
-                if ("drift_ms" in data && data.drift_ms != undefined) {
-                    this.drift_ms = data.drift_ms;
+                if ("report_drift" in data && data.report_drift != undefined) {
+                    this.report_drift = data.report_drift;
                 }
             }
             if (!this.gap_histogram)
@@ -3522,17 +3972,23 @@ export namespace livekit {
         get has_last_layer_lock_pli() {
             return pb_1.Message.getField(this, 36) != null;
         }
-        get sample_rate() {
-            return pb_1.Message.getFieldWithDefault(this, 42, 0) as number;
+        get packet_drift() {
+            return pb_1.Message.getWrapperField(this, RTPDrift, 44) as RTPDrift;
         }
-        set sample_rate(value: number) {
-            pb_1.Message.setField(this, 42, value);
+        set packet_drift(value: RTPDrift) {
+            pb_1.Message.setWrapperField(this, 44, value);
         }
-        get drift_ms() {
-            return pb_1.Message.getFieldWithDefault(this, 43, 0) as number;
+        get has_packet_drift() {
+            return pb_1.Message.getField(this, 44) != null;
         }
-        set drift_ms(value: number) {
-            pb_1.Message.setField(this, 43, value);
+        get report_drift() {
+            return pb_1.Message.getWrapperField(this, RTPDrift, 45) as RTPDrift;
+        }
+        set report_drift(value: RTPDrift) {
+            pb_1.Message.setWrapperField(this, 45, value);
+        }
+        get has_report_drift() {
+            return pb_1.Message.getField(this, 45) != null;
         }
         static fromObject(data: {
             start_time?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
@@ -3578,8 +4034,8 @@ export namespace livekit {
             last_key_frame?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
             layer_lock_plis?: number;
             last_layer_lock_pli?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
-            sample_rate?: number;
-            drift_ms?: number;
+            packet_drift?: ReturnType<typeof RTPDrift.prototype.toObject>;
+            report_drift?: ReturnType<typeof RTPDrift.prototype.toObject>;
         }): RTPStats {
             const message = new RTPStats({});
             if (data.start_time != null) {
@@ -3705,11 +4161,11 @@ export namespace livekit {
             if (data.last_layer_lock_pli != null) {
                 message.last_layer_lock_pli = dependency_1.google.protobuf.Timestamp.fromObject(data.last_layer_lock_pli);
             }
-            if (data.sample_rate != null) {
-                message.sample_rate = data.sample_rate;
+            if (data.packet_drift != null) {
+                message.packet_drift = RTPDrift.fromObject(data.packet_drift);
             }
-            if (data.drift_ms != null) {
-                message.drift_ms = data.drift_ms;
+            if (data.report_drift != null) {
+                message.report_drift = RTPDrift.fromObject(data.report_drift);
             }
             return message;
         }
@@ -3758,8 +4214,8 @@ export namespace livekit {
                 last_key_frame?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
                 layer_lock_plis?: number;
                 last_layer_lock_pli?: ReturnType<typeof dependency_1.google.protobuf.Timestamp.prototype.toObject>;
-                sample_rate?: number;
-                drift_ms?: number;
+                packet_drift?: ReturnType<typeof RTPDrift.prototype.toObject>;
+                report_drift?: ReturnType<typeof RTPDrift.prototype.toObject>;
             } = {};
             if (this.start_time != null) {
                 data.start_time = this.start_time.toObject();
@@ -3884,11 +4340,11 @@ export namespace livekit {
             if (this.last_layer_lock_pli != null) {
                 data.last_layer_lock_pli = this.last_layer_lock_pli.toObject();
             }
-            if (this.sample_rate != null) {
-                data.sample_rate = this.sample_rate;
+            if (this.packet_drift != null) {
+                data.packet_drift = this.packet_drift.toObject();
             }
-            if (this.drift_ms != null) {
-                data.drift_ms = this.drift_ms;
+            if (this.report_drift != null) {
+                data.report_drift = this.report_drift.toObject();
             }
             return data;
         }
@@ -3982,10 +4438,10 @@ export namespace livekit {
                 writer.writeUint32(35, this.layer_lock_plis);
             if (this.has_last_layer_lock_pli)
                 writer.writeMessage(36, this.last_layer_lock_pli, () => this.last_layer_lock_pli.serialize(writer));
-            if (this.sample_rate != 0)
-                writer.writeDouble(42, this.sample_rate);
-            if (this.drift_ms != 0)
-                writer.writeDouble(43, this.drift_ms);
+            if (this.has_packet_drift)
+                writer.writeMessage(44, this.packet_drift, () => this.packet_drift.serialize(writer));
+            if (this.has_report_drift)
+                writer.writeMessage(45, this.report_drift, () => this.report_drift.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -4118,11 +4574,11 @@ export namespace livekit {
                     case 36:
                         reader.readMessage(message.last_layer_lock_pli, () => message.last_layer_lock_pli = dependency_1.google.protobuf.Timestamp.deserialize(reader));
                         break;
-                    case 42:
-                        message.sample_rate = reader.readDouble();
+                    case 44:
+                        reader.readMessage(message.packet_drift, () => message.packet_drift = RTPDrift.deserialize(reader));
                         break;
-                    case 43:
-                        message.drift_ms = reader.readDouble();
+                    case 45:
+                        reader.readMessage(message.report_drift, () => message.report_drift = RTPDrift.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }

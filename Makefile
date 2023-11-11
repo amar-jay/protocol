@@ -1,10 +1,12 @@
-GOPATH=/go
+#GOPATH=/go
 PROTO_PATH=proto
-REPO=/workspace/protocol
+#REPO=/workspace/protocol
 GO_PROTOCOL=go_protocol
 TS_PROTOCOL=ts_protocol
-LIVEKIT_VERSION=@v1.5.7
+#LIVEKIT_VERSION=@v1.5.7
 PROTOC_GEN_VERSION=@v1.0.1
+LIVEKIT_VERSION=@v1.9.0
+#PROTOC_GEN_VERSION=*
 PB_REL="https://github.com/protocolbuffers/protobuf/releases"
 
 echo:
@@ -34,8 +36,9 @@ install: ts_install
 	sudo apt-get -y install protoc-gen-go
 
 ts_install: 
-	pnpm setup
-	pnpm install -g protoc-gen-ts
+	#pnpm setup
+	bun --version
+	bun install -g protoc-gen-ts
 
 manual_install: ts_install
 	curl -LO ${PB_REL}/download/v3.15.8/protoc-3.15.8-linux-x86_64.zip
