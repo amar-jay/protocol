@@ -37,6 +37,7 @@ message IsRoomActiveRequest {
 }
 
 message IsRoomActiveResponse {
+	bool status = 1;
 }
 
 message EndRoomRequest {

@@ -656,6 +656,8 @@ func (m *IsRoomActiveResponse) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Status
+
 	if len(errors) > 0 {
 		return IsRoomActiveResponseMultiError(errors)
 	}

@@ -559,23 +559,47 @@ export namespace protocol {
     }
     export class IsRoomActiveResponse extends pb_1.Message {
         #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {}) {
+        constructor(data?: any[] | {
+            status?: boolean;
+        }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") { }
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("status" in data && data.status != undefined) {
+                    this.status = data.status;
+                }
+            }
         }
-        static fromObject(data: {}): IsRoomActiveResponse {
+        get status() {
+            return pb_1.Message.getFieldWithDefault(this, 1, false) as boolean;
+        }
+        set status(value: boolean) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        static fromObject(data: {
+            status?: boolean;
+        }): IsRoomActiveResponse {
             const message = new IsRoomActiveResponse({});
+            if (data.status != null) {
+                message.status = data.status;
+            }
             return message;
         }
         toObject() {
-            const data: {} = {};
+            const data: {
+                status?: boolean;
+            } = {};
+            if (this.status != null) {
+                data.status = this.status;
+            }
             return data;
         }
         serialize(): Uint8Array;
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
+            if (this.status != false)
+                writer.writeBool(1, this.status);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -585,6 +609,9 @@ export namespace protocol {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.status = reader.readBool();
+                        break;
                     default: reader.skipField();
                 }
             }
