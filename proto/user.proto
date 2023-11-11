@@ -11,6 +11,12 @@ enum ConnectionState {
 	CONNECTING = 1;
 	INACTIVE = 2;
 	}
+enum Language {
+	ARABIC = 0;
+	ENGLISH = 1;
+	FRENCH = 2;
+	TURKISH = 3;
+	}
 
 message State {}
 
