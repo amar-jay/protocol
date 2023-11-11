@@ -1,8 +1,8 @@
 syntax="proto3";
-package go_protocol;
+package protocol;
 
 
-option go_package = "github.com/fallibilism/protocol/go_protocol";
+option go_package = "github.com/fallibilism/protocol";
 
 import "livekit_models.proto";
 

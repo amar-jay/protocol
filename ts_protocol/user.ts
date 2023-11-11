@@ -4,7 +4,7 @@
  * source: user.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as pb_1 from "google-protobuf";
-export namespace go_protocol {
+export namespace protocol {
     export enum ConnectionState {
         ACTIVE = 0,
         CONNECTING = 1,
